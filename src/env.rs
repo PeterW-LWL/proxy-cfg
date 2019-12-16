@@ -11,8 +11,8 @@ pub(crate) fn get_proxy_config() -> Result<Option<ProxyConfig>> {
         if key.ends_with("_proxy") {
             let scheme = &key[..key.len() - 6];
             if scheme == "no" {
-                for url in value.split(",").map(|s| s.trim()) {
-                    if url.len() > 0 {
+                for url in value.split(',').map(|s| s.trim()) {
+                    if !url.is_empty() {
                         proxy_config.whitelist.insert(url.to_string().to_lowercase());
                     }
                 }
@@ -22,7 +22,7 @@ pub(crate) fn get_proxy_config() -> Result<Option<ProxyConfig>> {
         }
     }
 
-    if proxy_config.proxies.len() == 0 {
+    if proxy_config.proxies.is_empty() {
         return Ok(None)
     }
 

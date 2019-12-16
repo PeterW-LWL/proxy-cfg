@@ -1,3 +1,5 @@
+#![allow(clippy::manual_non_exhaustive, clippy::blocks_in_if_conditions)]
+
 use std::collections::{HashMap, HashSet};
 
 use url::Url;
@@ -51,7 +53,7 @@ impl ProxyConfig {
         if self.whitelist.iter().any(|s| {
             if let Some(pos) = s.rfind('*') {
                 let slice = &s[pos + 1..];
-                return slice.len() > 0 && host.ends_with(slice)
+                return !slice.is_empty() && host.ends_with(slice)
             }
             false 
         }) { return false }
@@ -81,7 +83,7 @@ const METHODS: &[&ProxyFn] = &[
 ];
 
 pub fn get_proxy_config() -> Result<Option<ProxyConfig>> {
-    if METHODS.len() == 0 {
+    if METHODS.is_empty() {
         return Err(Error::PlatformNotSupported)
     }
 

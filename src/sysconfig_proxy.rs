@@ -41,13 +41,13 @@ fn get_proxy_config_from_file<P: AsRef<Path>>(config_file: P) -> Result<Option<P
         let key = String::from(*scheme) + "_PROXY";
         if let Some(proxy) = map.get(&key) { //check if ${SCHEME}_PROXY is defined
             let scheme = scheme.to_lowercase();
-            proxy_config.proxies.insert(scheme.into(), proxy.to_string());
+            proxy_config.proxies.insert(scheme, proxy.to_string());
         }
     }
 
     // determine the list of domains that should not be requested through the proxy
     if let Some(no_proxy) = map.get("NO_PROXY") {
-        for no_proxy_url in no_proxy.split(",") {
+        for no_proxy_url in no_proxy.split(',') {
             proxy_config.whitelist.insert(no_proxy_url.trim().to_string().to_lowercase());
         }
     }
@@ -219,7 +219,7 @@ NO_PROXY="localhost, 127.0.0.1"
 HTTP_PROXY=http://localhost"##);
         match  get_proxy_config_from_file(file.path()) {
             Err(_) => (), //all is fine
-            _ => assert!(false)
+            _ => panic!()
         }
     }
 }

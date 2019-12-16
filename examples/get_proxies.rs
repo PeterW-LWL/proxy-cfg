@@ -6,7 +6,7 @@ use std::process;
 
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
-    if args.len() == 0 {
+    if args.is_empty() {
         match get_proxy_config() {
             Ok(Some(ProxyConfig { proxies, .. })) => {
                 for (_, p) in proxies {
