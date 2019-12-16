@@ -12,8 +12,13 @@ impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             Error::InvalidConfig => write!(f, "invalid proxy configuration"),
-            Error::Os => write!(f, "error getting proxy configuration from the Operating System"),
-            Error::PlatformNotSupported => write!(f, "can not read proxy configuration on this platform"),
+            Error::Os => write!(
+                f,
+                "error getting proxy configuration from the Operating System"
+            ),
+            Error::PlatformNotSupported => {
+                write!(f, "can not read proxy configuration on this platform")
+            }
             Error::Io(e) => write!(f, "{}", e),
         }
     }

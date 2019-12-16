@@ -7,7 +7,7 @@ use url::Url;
 #[cfg(windows)]
 mod windows;
 
-#[cfg(target_os="macos")]
+#[cfg(target_os = "macos")]
 mod macos;
 
 #[cfg(feature = "env")]
@@ -35,16 +35,16 @@ impl ProxyConfig {
         let mut host = address.to_lowercase();
         if let Ok(url) = Url::parse(address) {
             if let Some(url_host) = url.host() {
-                 host = url_host.to_string().to_lowercase();
+                host = url_host.to_string().to_lowercase();
             }
         }
 
         if self.exclude_simple && !host.chars().any(|c| c == '.') {
-            return false
+            return false;
         }
 
         if self.whitelist.contains(&host) {
-            return false
+            return false;
         }
 
         // TODO: Wildcard matches on IP address, e.g. 192.168.*.*
@@ -53,17 +53,22 @@ impl ProxyConfig {
         if self.whitelist.iter().any(|s| {
             if let Some(pos) = s.rfind('*') {
                 let slice = &s[pos + 1..];
-                return !slice.is_empty() && host.ends_with(slice)
+                return !slice.is_empty() && host.ends_with(slice);
             }
-            false 
-        }) { return false }
+            false
+        }) {
+            return false;
+        }
 
         true
     }
 
     pub fn get_proxy_for_url(&self, url: &Url) -> Option<String> {
         match self.use_proxy_for_address(url.as_str()) {
-            true => self.proxies.get(url.scheme()).map(|s| s.to_string().to_lowercase()),
+            true => self
+                .proxies
+                .get(url.scheme())
+                .map(|s| s.to_string().to_lowercase()),
             false => None,
         }
     }
@@ -78,13 +83,13 @@ const METHODS: &[&ProxyFn] = &[
     &(sysconfig_proxy::get_proxy_config as ProxyFn), //This configurator has to come after the `env` configurator, because environment variables take precedence over /etc/sysconfig/proxy
     #[cfg(windows)]
     &(windows::get_proxy_config as ProxyFn),
-    #[cfg(target_os="macos")]
+    #[cfg(target_os = "macos")]
     &(macos::get_proxy_config as ProxyFn),
 ];
 
 pub fn get_proxy_config() -> Result<Option<ProxyConfig>> {
     if METHODS.is_empty() {
-        return Err(Error::PlatformNotSupported)
+        return Err(Error::PlatformNotSupported);
     }
 
     let mut last_err: Option<Error> = None;
@@ -92,12 +97,12 @@ pub fn get_proxy_config() -> Result<Option<ProxyConfig>> {
         match get_proxy_config() {
             Ok(Some(config)) => return Ok(Some(config)),
             Err(e) => last_err = Some(e),
-            _ => {},
+            _ => {}
         }
     }
 
     if let Some(e) = last_err {
-        return Err(e)
+        return Err(e);
     }
 
     Ok(None)
@@ -133,26 +138,46 @@ mod tests {
 
     #[test]
     fn test_get_proxy_for_url() {
-        let proxy_config = ProxyConfig { 
-            proxies: map!{ 
-                "http".into() => "1.1.1.1".into(), 
-                "https".into() => "2.2.2.2".into() 
+        let proxy_config = ProxyConfig {
+            proxies: map! {
+                "http".into() => "1.1.1.1".into(),
+                "https".into() => "2.2.2.2".into()
             },
-            whitelist: vec![
-                "www.devolutions.net", 
-                "*.microsoft.com", 
-                "*apple.com"
-            ].into_iter().map(|s| s.to_string()).collect(),
+            whitelist: vec!["www.devolutions.net", "*.microsoft.com", "*apple.com"]
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect(),
             exclude_simple: true,
-            ..Default::default() 
+            ..Default::default()
         };
 
-        assert_eq!(proxy_config.get_proxy_for_url(&Url::parse("http://simpledomain").unwrap()), None);
-        assert_eq!(proxy_config.get_proxy_for_url(&Url::parse("http://simple.domain").unwrap()), Some("1.1.1.1".into()));
-        assert_eq!(proxy_config.get_proxy_for_url(&Url::parse("http://www.devolutions.net").unwrap()), None);
-        assert_eq!(proxy_config.get_proxy_for_url(&Url::parse("http://www.microsoft.com").unwrap()), None);
-        assert_eq!(proxy_config.get_proxy_for_url(&Url::parse("http://www.microsoft.com.fun").unwrap()), Some("1.1.1.1".into()));
-        assert_eq!(proxy_config.get_proxy_for_url(&Url::parse("http://test.apple.com").unwrap()), None);
-        assert_eq!(proxy_config.get_proxy_for_url(&Url::parse("https://test.apple.net").unwrap()), Some("2.2.2.2".into()));
+        assert_eq!(
+            proxy_config.get_proxy_for_url(&Url::parse("http://simpledomain").unwrap()),
+            None
+        );
+        assert_eq!(
+            proxy_config.get_proxy_for_url(&Url::parse("http://simple.domain").unwrap()),
+            Some("1.1.1.1".into())
+        );
+        assert_eq!(
+            proxy_config.get_proxy_for_url(&Url::parse("http://www.devolutions.net").unwrap()),
+            None
+        );
+        assert_eq!(
+            proxy_config.get_proxy_for_url(&Url::parse("http://www.microsoft.com").unwrap()),
+            None
+        );
+        assert_eq!(
+            proxy_config.get_proxy_for_url(&Url::parse("http://www.microsoft.com.fun").unwrap()),
+            Some("1.1.1.1".into())
+        );
+        assert_eq!(
+            proxy_config.get_proxy_for_url(&Url::parse("http://test.apple.com").unwrap()),
+            None
+        );
+        assert_eq!(
+            proxy_config.get_proxy_for_url(&Url::parse("https://test.apple.net").unwrap()),
+            Some("2.2.2.2".into())
+        );
     }
 }

@@ -12,12 +12,12 @@ fn main() {
                 for (_, p) in proxies {
                     println!("{}", p.to_string());
                 }
-            },
+            }
             Ok(None) => println!("No proxy configured"),
             Err(e) => {
                 println!("Error getting proxies: {:?}", e);
                 process::exit(1);
-            },
+            }
         };
     } else {
         for arg in args {
@@ -27,15 +27,13 @@ fn main() {
                         Some(proxy) => println!("{} : {}", arg, proxy),
                         None => println!("No proxy needed for URL: '{}'", arg),
                     }
-                },
+                }
                 Ok(None) => println!("No proxy configured"),
                 Err(e) => {
                     println!("Error getting proxies: {:?}", e);
                     process::exit(1);
-                },
+                }
             }
         }
     }
 }
-
-
