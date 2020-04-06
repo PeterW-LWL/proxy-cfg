@@ -7,10 +7,10 @@ A Rust library to get proxy configuration from the OS.
 ## Usage
 
 ```Rust
-extern crate proxy_cfg;
-
-if let Some(proxy) = proxy_cfg::get_proxy_config().unwrap().get_proxy_for_url(&url) {
-    // use proxy to connect...
+if let Ok(Some(proxy_config)) = proxy_cfg::get_proxy_config() {
+    if let Some(proxy_address) = proxy_config.get_proxy_for_url(Url::parse("http://www.google.com").unwrap()) {
+        // use proxy_address to connect
+    }
 }
 ```
 
